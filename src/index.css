@@ -1,31 +1,72 @@
+/* Custom Startup Color Palette */
+:root {
+  --sakec-primary: #4f46e5;   /* Cyber Indigo */
+  --sakec-secondary: #06b6d4; /* Vibrant Cyan */
+  --sakec-dark: #0f172a;      /* Deep Slate */
+  --sakec-light: #f8fafc;     /* Off-White Background */
+}
+
 body {
-  background-color: #f8f9fa;
-  color: #212529;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--sakec-light);
+  color: var(--sakec-dark);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
 }
-.navbar {
-  border-bottom: 4px solid #000;
-  background-color: #fff;
+
+/* Gradient Text Effect */
+.text-gradient {
+  background: linear-gradient(90deg, var(--sakec-primary), var(--sakec-secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
+
+/* Button Overrides */
+.btn-dark {
+  background-color: var(--sakec-dark) !important;
+  border-color: var(--sakec-dark) !important;
+  transition: all 0.3s ease;
+}
+
+.btn-dark:hover {
+  background-color: var(--sakec-primary) !important;
+  border-color: var(--sakec-primary) !important;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+}
+
+.btn-outline-dark {
+  color: var(--sakec-dark) !important;
+  border-color: var(--sakec-dark) !important;
+}
+
+.btn-outline-dark:hover {
+  background-color: var(--sakec-dark) !important;
+  color: white !important;
+}
+
+/* Card Hover Animations */
 .card {
-  border: 2px solid #000;
-  border-radius: 0;
-  box-shadow: 4px 4px 0px #000;
-  transition: 0.2s;
-  background-color: #fff;
+  transition: all 0.3s ease;
+  border-radius: 12px !important;
+  border: 1px solid #e2e8f0 !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
+
 .card:hover {
-  transform: translateY(-3px);
-  box-shadow: 6px 6px 0px #000;
+  transform: translateY(-5px);
+  border-color: var(--sakec-secondary) !important;
+  box-shadow: 0 10px 15px -3px rgba(6, 182, 212, 0.15);
 }
-.btn-custom {
-  background-color: #000;
-  color: #fff;
-  border-radius: 0;
-  font-weight: bold;
-  border: 2px solid #000;
+
+/* Navbar Customization */
+.navbar-brand span:first-child {
+  background: linear-gradient(135deg, var(--sakec-primary), var(--sakec-secondary)) !important;
+  border-radius: 4px;
 }
-.btn-custom:hover {
-  background-color: #fff;
-  color: #000;
+
+.hover-underline:hover {
+  color: var(--sakec-primary) !important;
+  text-decoration: underline;
+  text-decoration-thickness: 2px;
+  text-underline-offset: 4px;
 }
