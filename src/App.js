@@ -16,7 +16,7 @@ function App() {
           {/* New Image-Based SAKEC Atlas Logo */}
           <Link className="navbar-brand py-0" to="/">
             <img 
-              src="/atlas-logo.png" 
+              src="C:\Users\GAGAN\SAKEC Atlas\src\atlas-logo.png" 
               alt="SAKEC Atlas Official Logo" 
               style={{ height: '65px', width: 'auto', objectFit: 'contain' }} 
             />
