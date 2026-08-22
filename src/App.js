@@ -21,7 +21,7 @@ function App() {
               style={{ height: '55px', width: 'auto', objectFit: 'contain' }} 
             />
             <span className="fw-black text-uppercase" style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.5px' }}>
-              SAKEC <span style={{ color: 'var(--sakec-primary)' }}>Atlas</span>
+              SAKEC Atlas
             </span>
           </Link>
 
