@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 export default function Transit() {
-  // Mock data now includes contact info
   const [transitRoutes, setTransitRoutes] = useState([
     { id: 1, type: "Carpool", route: "Tilak Nagar to SAKEC", seats: 2, host: "Smit", contact: "9876543210", time: "7:45 AM", status: "Active" },
     { id: 2, type: "Auto Share", route: "Chembur Station to SAKEC", seats: 1, host: "Veer", contact: "9876543211", time: "8:00 AM", status: "Active" },
@@ -12,9 +11,40 @@ export default function Transit() {
 
   const [searchTerm, setSearchTerm] = useState('');
   const [showForm, setShowForm] = useState(false);
+  const [generatedQR, setGeneratedQR] = useState(null); // Stores the QR Code URL
   
-  // Form data now requires a contact number
   const [formData, setFormData] = useState({ type: 'Carpool', route: '', seats: '', host: '', contact: '', time: '' });
+
+  // --- THE MAGIC: Check URL for Shared Rides on Load ---
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('share') === 'true') {
+      const sharedRide = {
+        id: Date.now(),
+        type: params.get('type') || 'Carpool',
+        route: params.get('route'),
+        host: params.get('host'),
+        contact: params.get('contact'),
+        time: params.get('time'),
+        seats: params.get('seats'),
+        status: 'Active'
+      };
+      
+      // If valid data exists, add it to the top of the list
+      if (sharedRide.route && sharedRide.host) {
+        setTransitRoutes(prev => {
+          // Prevent duplicates if user refreshes the page
+          if (!prev.some(r => r.route === sharedRide.route && r.host === sharedRide.host)) {
+             return [sharedRide, ...prev];
+          }
+          return prev;
+        });
+      }
+      
+      // Clean up the URL so it looks normal again
+      window.history.replaceState(null, '', '/transit');
+    }
+  }, []);
 
   const handleChange = (e) => setFormData({ ...formData, [e.target.id]: e.target.value });
 
@@ -22,17 +52,19 @@ export default function Transit() {
     e.preventDefault();
     if (!formData.route || !formData.host || !formData.time || !formData.seats || !formData.contact) return; 
     
-    const newRide = {
-      id: Date.now(),
-      ...formData,
-      status: 'Active'
-    };
-    
+    // Add locally to the poster's screen
+    const newRide = { id: Date.now(), ...formData, status: 'Active' };
     setTransitRoutes([newRide, ...transitRoutes]);
     
-    // Reset form
+    // Construct the secret sharing URL using the current website's domain
+    const shareUrl = `${window.location.origin}/transit?share=true&type=${encodeURIComponent(formData.type)}&route=${encodeURIComponent(formData.route)}&host=${encodeURIComponent(formData.host)}&contact=${encodeURIComponent(formData.contact)}&time=${encodeURIComponent(formData.time)}&seats=${encodeURIComponent(formData.seats)}`;
+    
+    // Use a public API to turn the URL into a QR code image
+    const qrImageUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}`;
+    setGeneratedQR(qrImageUrl);
+    
+    // Reset form but keep the UI open to show the QR code
     setFormData({ type: 'Carpool', route: '', seats: '', host: '', contact: '', time: '' });
-    setShowForm(false);
   };
 
   const filteredRoutes = transitRoutes.filter(route => 
@@ -59,7 +91,7 @@ export default function Transit() {
             />
             <button 
               className="btn btn-dark btn-lg rounded-0 fw-bold border-2 px-4 whitespace-nowrap"
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => { setShowForm(!showForm); setGeneratedQR(null); }}
               style={{ minWidth: '180px' }}
             >
               {showForm ? 'Cancel Form' : '+ Post a Ride'}
@@ -68,51 +100,67 @@ export default function Transit() {
         </div>
       </div>
 
-      {/* Upgraded Form with Contact Field */}
       {showForm && (
         <div className="row justify-content-center mb-5 fade-in">
           <div className="col-lg-8">
             <div className="card p-4 border border-3 border-dark bg-white rounded-0 shadow-sm">
-              <h5 className="fw-bold text-uppercase border-bottom border-dark pb-2 mb-3 text-gradient">Register New Route</h5>
-              <form onSubmit={handlePostRide} className="row g-3">
-                <div className="col-md-4">
-                  <label className="form-label small fw-bold">Transport Type</label>
-                  <select id="type" className="form-select border-dark rounded-0" value={formData.type} onChange={handleChange}>
-                    <option>Carpool</option>
-                    <option>Auto Share</option>
-                    <option>Walking Group</option>
-                  </select>
+              
+              {/* Show QR Code if a ride was just posted */}
+              {generatedQR ? (
+                <div className="text-center py-4">
+                  <h4 className="fw-bold text-success mb-3">Route Published Successfully!</h4>
+                  <p className="text-muted mb-4">Scan this QR code with another phone to instantly sync this ride to their device.</p>
+                  <img src={generatedQR} alt="Scan to join ride" className="border border-3 border-dark p-2 rounded bg-white shadow-sm mb-4" />
+                  <br />
+                  <button onClick={() => { setShowForm(false); setGeneratedQR(null); }} className="btn btn-outline-dark rounded-0 fw-bold px-4">
+                    Close
+                  </button>
                 </div>
-                <div className="col-md-8">
-                  <label className="form-label small fw-bold">Route Name</label>
-                  <input type="text" id="route" className="form-control border-dark rounded-0" placeholder="e.g., Vashi to SAKEC" value={formData.route} onChange={handleChange} required />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label small fw-bold">Host Name</label>
-                  <input type="text" id="host" className="form-control border-dark rounded-0" placeholder="Your Name" value={formData.host} onChange={handleChange} required />
-                </div>
-                <div className="col-md-4">
-                  <label className="form-label small fw-bold">WhatsApp / Phone</label>
-                  <input type="text" id="contact" className="form-control border-dark rounded-0" placeholder="10-digit number" value={formData.contact} onChange={handleChange} required />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-bold">Time</label>
-                  <input type="text" id="time" className="form-control border-dark rounded-0" placeholder="8:30 AM" value={formData.time} onChange={handleChange} required />
-                </div>
-                <div className="col-md-2">
-                  <label className="form-label small fw-bold">Seats</label>
-                  <input type="number" id="seats" className="form-control border-dark rounded-0" placeholder="3" value={formData.seats} onChange={handleChange} required />
-                </div>
-                <div className="col-12 mt-4 text-end">
-                  <button type="submit" className="btn btn-dark rounded-0 fw-bold px-5">Publish Route</button>
-                </div>
-              </form>
+              ) : (
+                /* Otherwise, show the normal form */
+                <>
+                  <h5 className="fw-bold text-uppercase border-bottom border-dark pb-2 mb-3 text-gradient">Register New Route</h5>
+                  <form onSubmit={handlePostRide} className="row g-3">
+                    <div className="col-md-4">
+                      <label className="form-label small fw-bold">Transport Type</label>
+                      <select id="type" className="form-select border-dark rounded-0" value={formData.type} onChange={handleChange}>
+                        <option>Carpool</option>
+                        <option>Auto Share</option>
+                        <option>Walking Group</option>
+                      </select>
+                    </div>
+                    <div className="col-md-8">
+                      <label className="form-label small fw-bold">Route Name</label>
+                      <input type="text" id="route" className="form-control border-dark rounded-0" placeholder="e.g., Vashi to SAKEC" value={formData.route} onChange={handleChange} required />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-bold">Host Name</label>
+                      <input type="text" id="host" className="form-control border-dark rounded-0" placeholder="Your Name" value={formData.host} onChange={handleChange} required />
+                    </div>
+                    <div className="col-md-4">
+                      <label className="form-label small fw-bold">WhatsApp / Phone</label>
+                      <input type="text" id="contact" className="form-control border-dark rounded-0" placeholder="10-digit number" value={formData.contact} onChange={handleChange} required />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label small fw-bold">Time</label>
+                      <input type="text" id="time" className="form-control border-dark rounded-0" placeholder="8:30 AM" value={formData.time} onChange={handleChange} required />
+                    </div>
+                    <div className="col-md-2">
+                      <label className="form-label small fw-bold">Seats</label>
+                      <input type="number" id="seats" className="form-control border-dark rounded-0" placeholder="3" value={formData.seats} onChange={handleChange} required />
+                    </div>
+                    <div className="col-12 mt-4 text-end">
+                      <button type="submit" className="btn btn-dark rounded-0 fw-bold px-5">Generate Sync Code</button>
+                    </div>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* Upgraded Grid with WhatsApp Integration */}
+      {/* Grid */}
       <div className="row justify-content-center">
         <div className="col-lg-10">
           <div className="row">
@@ -138,22 +186,11 @@ export default function Transit() {
                         <p className="mb-0 text-muted">Seats: <strong className="text-dark fs-5">{route.seats}</strong></p>
                       </div>
                       
-                      {/* Action Buttons */}
                       <div className="mt-auto d-flex gap-2">
-                        <button 
-                          className={`btn flex-grow-1 py-2 rounded-0 fw-bold border-2 border-dark ${route.status === 'Full' ? 'btn-outline-secondary disabled' : 'btn-outline-dark'}`}
-                        >
+                        <button className={`btn flex-grow-1 py-2 rounded-0 fw-bold border-2 border-dark ${route.status === 'Full' ? 'btn-outline-secondary disabled' : 'btn-outline-dark'}`}>
                           {route.status === 'Full' ? 'Route Full' : 'Request to Join'}
                         </button>
-                        
-                        {/* Real WhatsApp Deep Link */}
-                        <a 
-                          href={`https://wa.me/91${route.contact}?text=Hey%20${route.host},%20I%20saw%20your%20ride%20on%20SAKEC%20Atlas.%20Are%20there%20still%20seats%20available?`}
-                          target="_blank"
-                          rel="noreferrer"
-                          className={`btn py-2 rounded-0 fw-bold border-2 border-dark ${route.status === 'Full' ? 'btn-secondary disabled border-secondary' : 'btn-dark'}`}
-                          title="Message on WhatsApp"
-                        >
+                        <a href={`https://wa.me/91${route.contact}?text=Hey%20${route.host},%20I%20saw%20your%20ride%20on%20SAKEC%20Atlas.%20Are%20there%20still%20seats%20available?`} target="_blank" rel="noreferrer" className={`btn py-2 rounded-0 fw-bold border-2 border-dark ${route.status === 'Full' ? 'btn-secondary disabled border-secondary' : 'btn-dark'}`}>
                           Chat 💬
                         </a>
                       </div>
