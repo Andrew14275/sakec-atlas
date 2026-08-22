@@ -1,10 +1,13 @@
 /* Custom Startup Color Palette */
+/* Custom SAKEC Atlas Logo Color Palette */
 :root {
-  --sakec-primary: #4f46e5;   /* Cyber Indigo */
-  --sakec-secondary: #06b6d4; /* Vibrant Cyan */
-  --sakec-dark: #0f172a;      /* Deep Slate */
-  --sakec-light: #f8fafc;     /* Off-White Background */
+  --sakec-primary: #5c7cfa;   /* The exact bright blue from the logo's book pages */
+  --sakec-secondary: #1a1b1e; /* Deep black from the crest */
+  --sakec-dark: #000000;      /* Pure black for high-contrast borders */
+  --sakec-light: #f8fafc;     /* Clean off-white background */
 }
+
+/* Ensure you keep the rest of your index.css below this... */
 
 body {
   background-color: var(--sakec-light);

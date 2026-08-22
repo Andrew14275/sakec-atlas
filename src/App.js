@@ -12,11 +12,16 @@ function App() {
     <Router>
       <nav className="navbar navbar-expand-lg navbar-light bg-white mb-4 border-bottom border-dark border-4">
         <div className="container">
-          {/* New Text-Based Logo */}
-          <Link className="navbar-brand fw-bold text-uppercase fs-3 d-flex align-items-center" to="/">
-            <span className="bg-dark text-white px-2 py-1 me-1 shadow-sm">SAKEC</span>
-            <span>ATLAS</span>
+          
+          {/* New Image-Based SAKEC Atlas Logo */}
+          <Link className="navbar-brand py-0" to="/">
+            <img 
+              src="/atlas-logo.png" 
+              alt="SAKEC Atlas Official Logo" 
+              style={{ height: '65px', width: 'auto', objectFit: 'contain' }} 
+            />
           </Link>
+
           <button className="navbar-toggler rounded-0 border-dark" type="button" data-bs-toggle="collapse" data-bs-target="#atlasNav">
             <span className="navbar-toggler-icon"></span>
           </button>
@@ -34,6 +39,7 @@ function App() {
         </div>
       </nav>
 
+      {/* This is the crucial section that went missing! */}
       <main className="container pb-5">
         <Routes>
           <Route path="/" element={<Landing />} />
