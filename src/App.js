@@ -13,13 +13,16 @@ function App() {
       <nav className="navbar navbar-expand-lg navbar-light bg-white mb-4 border-bottom border-dark border-4">
         <div className="container">
           
-          {/* New Image-Based SAKEC Atlas Logo */}
-          <Link className="navbar-brand py-0" to="/">
+          {/* Flex Container for Logo Image + Text */}
+          <Link className="navbar-brand py-0 d-flex align-items-center gap-2" to="/">
             <img 
-              src="./atlas-logo.png" 
+              src="/atlas-logo.png" 
               alt="SAKEC Atlas Official Logo" 
-              style={{ height: '65px', width: 'auto', objectFit: 'contain' }} 
+              style={{ height: '55px', width: 'auto', objectFit: 'contain' }} 
             />
+            <span className="fw-black text-uppercase" style={{ fontSize: '1.4rem', fontWeight: 900, letterSpacing: '-0.5px' }}>
+              SAKEC <span style={{ color: 'var(--sakec-primary)' }}>Atlas</span>
+            </span>
           </Link>
 
           <button className="navbar-toggler rounded-0 border-dark" type="button" data-bs-toggle="collapse" data-bs-target="#atlasNav">
@@ -39,7 +42,6 @@ function App() {
         </div>
       </nav>
 
-      {/* This is the crucial section that went missing! */}
       <main className="container pb-5">
         <Routes>
           <Route path="/" element={<Landing />} />
